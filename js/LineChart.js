@@ -13,10 +13,12 @@ function LineChart() {
     var filter = [];
     var margin = {
         top: 0,
-        left: 100,
+        left: 130,
         bottom: 50,
         right: 110
     };
+    var scaleMax = false;
+    var scaleLock;
     
     function chart(selection) {
         //chart dimensions
@@ -83,6 +85,9 @@ function LineChart() {
             
             var yMin = d3.min(deps, function(c) {return d3.min(c.values, function(v) {return v.yval})});
             var yMax = d3.max(deps, function(c) {return d3.max(c.values, function(v) {return v.yval})});
+            if (scaleMax == true) {
+                yMax = scaleLock;
+            }
             yScale.domain([yMin, yMax]).range([innerHeight, 0]);
             
             //set call and update axes position       
@@ -112,7 +117,7 @@ function LineChart() {
                     
             //y text
             svg.select('.ytitle')
-                    .attr('transform', 'translate(' + (margin.left - 40) + ', ' + (margin.top + innerHeight / 2) + ') rotate(-90)')
+                    .attr('transform', 'translate(' + (margin.left - 60) + ', ' + (margin.top + innerHeight / 2) + ') rotate(-90)')
                     .transition()
                     .duration(0)
                     .text(yText);
@@ -253,6 +258,22 @@ function LineChart() {
         margin = obj;
         return chart;
     };
+    
+    chart.scaleLock = function(val) {
+        if(!arguments.length) {
+            return scaleLock;
+        }
+        scaleLock = val;
+        return chart;
+    }
+    
+    chart.scaleMax = function(bool) {
+        if(!arguments.length) {
+            return scaleMax;
+        }
+        scaleMax = bool;
+        return chart;
+    }
     
     return chart;
 }

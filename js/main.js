@@ -21,7 +21,9 @@ $(function() {
                 .indy('year')
                 .y('population')
                 .yLabel('CO2 Emissions (kt)')
+                .height(580)
                 .xLabel('Year');
+                
                 
   var united = MapPlot()
                 .lat('lat')
@@ -29,6 +31,13 @@ $(function() {
                 .iden('name')
                 .width(600)
                 .height(600);
+                
+  var world = WorldMap()
+                .unit('country')
+                .ratio('temp')
+                .width(700)
+                .height(600);
+              
                 
   var engaged = false;
   
@@ -79,7 +88,9 @@ $(function() {
     
     //determine which data to grab
     var getData = function(index) {
-        if (index <= 8) {
+        if (index <= 4) {
+          surface(index);
+        } else if (index <= 8) {
           carbon(index);
         } else if (index <= 12) {
           pop(index);
@@ -95,6 +106,48 @@ $(function() {
         }
     };
     
+    //handles surface temp data
+    var surface = function(index) {
+      d3_queue.queue()
+        .defer(d3.json, 'json/borders/boundaries.json')
+        .defer(d3.csv, 'data/temp.csv')
+        .await(function(error, map, data) {
+          switch(index) {
+            case 0:
+              break;
+            case 1:
+              if (engaged) {
+                $('#vis').empty();
+              }
+              engaged = true;
+              showVis();
+              world.map(map);
+              chartWrapper.datum(data).call(world);
+              break;
+            case 2:
+              showVis();
+              engaged = false;
+              world.map(map);
+              chartWrapper.datum(data).call(world);
+              break;
+            case 3:
+              showVis();
+              world.map(map);
+              chartWrapper.datum(data).call(world);
+              break;
+            case 4:
+              if (engaged) {
+                $('#vis').empty();
+              }
+              engaged = true;
+              showVis();
+              world.map(map);
+              chartWrapper.datum(data).call(world);
+              break;
+          }
+        });
+    };
+    
     //handles carbon emission data
     var carbon = function(index) {
       d3.csv('data/emission/co2.csv', function(data) {
@@ -103,12 +156,14 @@ $(function() {
             if (engaged) {
               $('#vis').empty();
             }
+            graph2.yLabel('CO2 Emissions (kt)');
             data.filter(function(d) {return objFilter1(d)});
             chartWrapper.datum(data).call(graph2);
             showVis();
             engaged = true;
             break;
           case 6:
+            graph2.yLabel('CO2 Emissions (kt)');
             engaged = false;
             showVis();
             data.filter(function(d) {return objFilter2(d)});
@@ -116,6 +171,7 @@ $(function() {
             break;
           case 7:
             showVis();
+            graph2.yLabel('CO2 Emissions (kt)');
             data.filter(function(d) {return objFilter3(d)});
             chartWrapper.datum(data).call(graph2);
             break;
@@ -124,7 +180,9 @@ $(function() {
               $('#vis').empty();
             }
             engaged = true;
+            graph2.yLabel('CO2 Emissions (kt)');
             showVis();
+            graph2.scaleMax(false);
             data.filter(function(d) {return objFilter3(d)});
             chartWrapper.datum(data).call(graph2);
             break;
@@ -188,6 +246,8 @@ $(function() {
             }
             engaged = true;
             graph2.yLabel('Birth Rate (per 1000 people)');
+            graph2.scaleMax(true);
+            graph2.scaleLock(39);
             data.filter(function(d) {return objFilter1(d)});
             chartWrapper.datum(data).call(graph2);
             showVis();
